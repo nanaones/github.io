@@ -1,0 +1,3 @@
+[submodule "/home/nara/git/nanaones.github.io/gunicorn-guide/themes/book"]
+	path = /home/nara/git/nanaones.github.io/gunicorn-guide/themes/book
+	url = https://github.com/kaiiiz/hexo-theme-book
