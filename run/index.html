@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="kr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          Run - Gunicorn-korean Guide
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+<!-- Google Analytics -->
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-169320839-1', 'auto');
+ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>GUNICORN-KOREAN GUIDE</span>
+  </a>
+</div>
+    <div class="book-menu">
+  <h1 id="Gunicorn"><a href="#Gunicorn" class="headerlink" title="Gunicorn"></a>Gunicorn</h1><h2 id="설치하기"><a href="#설치하기" class="headerlink" title="설치하기"></a>설치하기</h2><ul>
+<li><a href="/install/index.html">설치하는 방법</a></li>
+<li><a href="/install/index.html#비동기-워커-Async-Worker">비동기 사용을 위한 추가 설치</a></li>
+<li><a href="/install/index.html#DebianGNU-Linux">Debian/Linux에서 시스템 패키지 매니저를 사용하여 설치하기</a></li>
+</ul>
+<h2 id="실행하기"><a href="#실행하기" class="headerlink" title="실행하기"></a>실행하기</h2><ul>
+<li><a href="/run/index.html">실행하는 방법</a></li>
+<li><a href="/integration/index.html">다른 툴과 병합하는 방법</a></li>
+</ul>
+
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          
+<article id="page">
+  <h1>Run</h1>
+  <p>명령을 사용하여 Gunicorn을 실행하거나 Django, Pyramid 또는 TurboGears와 같은 널리 사용되는 프레임 워크와 통합 할 수 있습니다.<br>프로덕션에서 Gunicorn을 배포하려면<code>deploy</code>를 참조하세요.</p>
+<h3 id="명령어"><a href="#명령어" class="headerlink" title="명령어"></a>명령어</h3><hr>
+<p>Gunicorn을 설치한 이후에는, 다음과 같이, <code>gunicorn</code> 명령어를 통해서 접근할 수 있습니다. </p>
+<h2 id="gunicorn"><a href="#gunicorn" class="headerlink" title="gunicorn"></a>gunicorn</h2><p>Basic usage:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gunicorn [OPTIONS] [WSGI_APP]</span><br></pre></td></tr></table></figure>
+
+
+<p>여기서 WSGI_APP는<code>$(MODULE_NAME): $(VARIABLE_NAME)</code>패턴입니다.<br>모듈 이름은 전체 점선 경로 일 수 있습니다. 변수 이름은 지정된 모듈에서 찾아야하는 WSGI Callable 객체를 나타냅니다.  </p>
+<p>20.1.0 <code>[WSGI_APP]</code> 부분은 <code>config</code> 파일에서 지정하였을 경우 입력하지 않아도 됩니다.   </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">def app(environ, start_response):</span><br><span class="line">    &quot;&quot;&quot;Simplest possible application object&quot;&quot;&quot;</span><br><span class="line">    data &#x3D; b&#39;Hello, World!\n&#39;</span><br><span class="line">    status &#x3D; &#39;200 OK&#39;</span><br><span class="line">    response_headers &#x3D; [</span><br><span class="line">        (&#39;Content-type&#39;, &#39;text&#x2F;plain&#39;),</span><br><span class="line">        (&#39;Content-Length&#39;, str(len(data)))</span><br><span class="line">    ]</span><br><span class="line">    start_response(status, response_headers)</span><br><span class="line">    return iter([data])</span><br></pre></td></tr></table></figure>
+
+<p>위와 같은 app코드는 다음 명령어를 통해 실행 가능합니다:  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gunicorn --workers&#x3D;2 test:app</span><br></pre></td></tr></table></figure>
+
+<p>변수 이름은 함수 호출 일 수도 있습니다.<br>이 경우 모듈에서 이름을 가져온 다음 어플리케이션 객체를 가져 오기 위해 호출됩니다.<br>이런 패턴을 일반적으로 “애플리케이션 팩토리” 패턴이라고하며, 다음과 같이 gunicorn을 적용하여 사용할 수 있습니다.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def create_app():</span><br><span class="line">    app &#x3D; FrameworkApp()</span><br><span class="line">    ...</span><br><span class="line">    return app</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gunicorn --workers&#x3D;2 &#39;test:create_app()&#39;</span><br></pre></td></tr></table></figure>
+
+<p>위치 및 키워드 파라미터도 아래의 옵션을 통해서 사용할 수 있지만<br>커멘드라인이 아닌 환경 변수에서 구성을 적용하는 것이 좋습니다.</p>
+<h3 id="Commonly-Used-Arguments"><a href="#Commonly-Used-Arguments" class="headerlink" title="Commonly Used Arguments"></a>Commonly Used Arguments</h3><ul>
+<li><code>-c CONFIG, --config=CONFIG</code><br><code>$(PATH)</code>, <code>file:$(PATH)</code>, or <code>python:$(MODULE_NAME)</code> 형식으로 설정파일을 지정합니다.  </li>
+<li><code>-b BIND, --bind=BIND</code> - 바인딩할 서버 소켓을 지정합니다. 서버 소켓은  <code>$(HOST)</code>, <code>$(HOST):$(PORT)</code>, <code>fd://$(FD)</code>, 혹은<br><code>unix:$(PATH)</code>. 다음과 같이 지정할 수 있습니다 . IP는 <code>$(HOST)</code>에 할당합니다.  </li>
+<li><code>-w WORKERS, --workers=WORKERS</code> - 워커 프로세스의 갯수를 지정합니다.<br>워커 프로세스의 갯수는 보통 서버의 코어당 2-4개 사이에서 결정합니다. <code>faq</code> 를 체크하여서 이 파라미터에 대한 설계들을 확인해 보세요.  </li>
+<li><code>-k WORKERCLASS, --worker-class=WORKERCLASS</code> - 실행할 워커 프로세스의 타입을<br>말합니다. 이 파라미터를 사용하시기 전에는 production 페이지를 반드시 읽어주시기 바랍니다.<br><code>$(NAME)</code> 의 변경을 통해서 설정할 수 있습니다. 각 프로세스 워커의 이름들은 <code>sync</code>, <code>eventlet</code>, <code>gevent</code>, <code>tornado</code>, <code>gthread</code>. 가 있으며, 기본값으로는 <code>sync</code>가 설정되어 있습니다. 자세한 정보를 알고싶으신 경우, <code>worker-class</code> 문서를 읽어주시기 바랍니다.   </li>
+<li><code>-n APP_NAME, --name=APP_NAME</code> - 만약<br><a href="https://pypi.python.org/pypi/setproctitle" target="_blank" rel="noopener">setproctitle</a> 가 설치되어 있다면, 프로세스 시스템 테이블에 나타나는 Gunicorn 프로세스의 이름을 이 파라미터를 통해서 변경할 수 있습니다.(<code>ps</code> 와 <code>top</code>같은 도구에 영향을 끼칩니다.)</li>
+</ul>
+<p>환경 변수를 사용하여 설정을 지정할 수 있습니다.<br><code>GUNICORN_CMD_ARGS &lt;settings&gt;</code>  </p>
+<p>자세한 사용 방법은 <code>configuration</code>과 <code>settings</code>를 참고 주시기 바랍니다.</p>
+<hr>
+<p>역자주)<br>짧은 파이썬 코드를 활용한 실행방법의 예:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">from flask import Flask</span><br><span class="line">app &#x3D; Flask(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.route(&#39;&#x2F;&#39;)</span><br><span class="line">def hello():</span><br><span class="line">    return &quot;Hello World!&quot;</span><br><span class="line"></span><br><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure>
+
+<p>실행시킬 python flask app 이 위와 같다면, 실행 구문은 다음과 같습니다.   </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gunicorn [OPTIONS] main:app</span><br></pre></td></tr></table></figure>
+
+</article>
+
+<div id="paginator">
+  
+</div>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="n"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>nanaones</div>
+      <div>2020-06-13</div>
+    </div>
+  </div>
+
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>
