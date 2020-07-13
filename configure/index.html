@@ -11,7 +11,7 @@
 
     <title>
         
-          Gunicorn-korean Guide
+          configure - Gunicorn-korean Guide
         
     </title>
 
@@ -138,42 +138,57 @@ function sidebar_toggle() {
 
         </div>
         <div class="book-content">
-          <div class='book-archive'>
-  <!-- Title -->
-  
-    <h1>Archives</h1>
-  
-
-  
-    <!-- Split post by year -->
-    
-  
-
-  
-      <div class="years">
-          <h2>2020</h2>
-          <ul class="archive-list-item">
           
-              <li>
-                <span>2020-04-13</span>
-                <a href="/2020/04/13/menu/">
-                  menu
-                </a>
-              </li>
-          
-              <li>
-                <span>2020-04-13</span>
-                <a href="/2020/04/13/home/">
-                  home
-                </a>
-              </li>
-          
-          </ul>
-      </div>
-  
+<article id="page">
+  <h1>configure</h1>
+  <p>Gunicorn은 총 다섯 군데에서 설정을 읽어들입니다.</p>
+<ol>
+<li><p><code>환경 변수</code><br> Gunicorn은 먼저 <code>설정 파일</code>로부터 환경 변수를 읽습니다.</p>
+</li>
+<li><p><code>프레임 워크별 구성(설정파일)</code><br> Gunicorn은 <code>프레임 워크별 구성(설정파일)</code>에서 구성을 읽습니다. 현재는 Paster 응용 프로그램에만 영향을줍니다.</p>
+</li>
+<li><p><code>gunicorn.conf.py</code><br> 현재 작업 경로에서 검색되거나, 명령 행 인수로 지정하여 사용할 수 있습니다.  </p>
+</li>
+<li><p><code>GUNICORN_CMD_ARGS</code><br> 환경 변수에 저장된 커멘드라인 인수입니다.</p>
+</li>
+<li><p>명령줄 인수 지정(커멘드라인)<br>명령줄로 인수를 지정하는 것은 가장 마지막에 적용됩니다. (가장 마지막에 적용되어, 모든 설정을 덮어씁니다.)  </p>
+<p>커멘드라인을 사용하여 구성된 설정을 콘솔에 출력하려면 다음 명령을 실행하여 확인할 수 있습니다.<br>(이 명령어는 응용프로그램의 성공적인 실행 유무와는 별개로, 설정만을 불러오는 기능입니다.)</p>
+<pre><code>$ gunicorn --print-config APP_MODULE</code></pre></li>
+</ol>
+<h3 id="Command-Line"><a href="#Command-Line" class="headerlink" title="Command Line"></a>Command Line</h3><hr>
+<p><strong>커멘드라인에 옵션이 지정된 경우 앱별 설정 또는 선택적 구성 파일에 지정된 다른 모든 값이 재정의됩니다.</strong><br>커멘드라인에서 모든 Gunicorn 설정을 정의할 수있는 것은 아닙니다.<br>전체 커멘드라인 설정 목록을 보려면 다음 명령어를 수행하세요.</p>
+<pre><code>$ gunicorn -h</code></pre><p><code>--version</code> 플래그는 위 명령어를 통해 확인할 수 없지만 사용 가능합니다. (ver ~20.0.4)  </p>
+<h3 id="Configuration-File"><a href="#Configuration-File" class="headerlink" title="Configuration File"></a>Configuration File</h3><hr>
+<p>설정 파일은 다음 두 가지 조건을 만족하여야 합니다.  </p>
+<ol>
+<li><strong>python extension</strong>을 가진 유효한 파이썬 소스 파일이어야합니다 (예 :<code>gunicorn.conf.py</code>).  </li>
+<li>파일 시스템에서 읽을 수 있어야합니다.     </li>
+</ol>
+<p>모듈 경로 (sys.path, PYTHONPATH)에있을 필요는 없습니다.<br>Gunicorn을 시작할 때마다 실행됩니다. (재실행시에도 읽어들입니다.)</p>
+<p>사용 방법은 다음과 같이 매개 변수를 설정하려면 할당하세요.<br>특별한 문법은 없으며, <code>Python</code>코드에서 변수를 할당 하는 것과 동일합니다.</p>
+<p>설정 예:</p>
+<pre><code>import multiprocessing
 
+bind = &quot;127.0.0.1:8000&quot;
+workers = multiprocessing.cpu_count() * 2 + 1</code></pre><p>모든 설정은 <code>setting</code> 에 리스트로 기록되어있습니다. </p>
+<h3 id="Framework-Settings"><a href="#Framework-Settings" class="headerlink" title="Framework Settings"></a>Framework Settings</h3><hr>
+<p>현재 Paster 응용 프로그램 만이 프레임 워크 별 설정에 액세스 할 수 있습니다.    </p>
+<p>WSGI 애플리케이션에 설정을 제공하거나 <code>Django</code>의 <code>settings.py</code>에서 정보를 가져 오는 아이디어가 있다면<br>언제든지 GitHub에서 이슈를 통해 제보 바랍니다.<br><a href="https://github.com/benoitc/gunicorn/issues" target="_blank" rel="noopener">issue 페이지 링크</a></p>
+<h3 id="Paster-Applications"><a href="#Paster-Applications" class="headerlink" title="Paster Applications"></a>Paster Applications</h3><hr>
+<p>INI 파일에서 다음과 같이 Gunicorn을 서버로 사용하도록 지정할 수 있습니다.</p>
+<pre><code>[server:main]
+use = egg:gunicorn#main
+host = 192.168.0.1
+port = 80
+workers = 2
+proc_name = brim</code></pre><p>Gunicorn이 알고있는 모든 매개 변수는 기본 구성에 자동으로 삽입됩니다.<br>설정파일 및 자동으로 입력된 설정은 커멘드라인으로 입력된 변수에 덮어쓰기 된다는 것을 명심해 주세요.</p>
+
+</article>
+
+<div id="paginator">
   
 </div>
+
         </div>
       </div>
       <div class="column col-2 hide-lg">
@@ -197,7 +212,7 @@ function sidebar_toggle() {
     <!-- Author title -->
     <div class="author-title">
       <div>nanaones</div>
-      <div></div>
+      <div>2020-07-11</div>
     </div>
   </div>
 
