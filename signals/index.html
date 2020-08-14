@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="kr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+    
+      <link rel="icon" href="/favicon.png" />
+    
+
+    <title>
+        
+          Settings - Gunicorn-korean Guide
+        
+    </title>
+
+    <!-- Spectre.css framework -->
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+
+    <!-- theme css & js -->
+    
+<link rel="stylesheet" href="/css/book.css">
+
+    
+<script src="/js/book.js"></script>
+
+
+    <!-- tocbot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    
+    <!-- katex -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+
+    
+<!-- Google Analytics -->
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-169320839-1', 'auto');
+ga('send', 'pageview');
+</script>
+<!-- End Google Analytics -->
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zooming/2.1.1/zooming.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const zooming = new Zooming()
+    zooming.listen('.book-content img')
+})
+</script>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+
+<div class="book-container">
+  <div class="book-sidebar">
+    <div class="book-brand">
+  <a href="/">
+    <img src="/favicon.png">
+    <span>GUNICORN-KOREAN GUIDE</span>
+  </a>
+</div>
+    <div class="book-menu">
+  <h1 id="Gunicorn"><a href="#Gunicorn" class="headerlink" title="Gunicorn"></a>Gunicorn</h1><h2 id="설치하기"><a href="#설치하기" class="headerlink" title="설치하기"></a>설치하기</h2><ul>
+<li><a href="/install/index.html">설치하는 방법</a></li>
+<li><a href="/install/index.html#비동기-워커-Async-Worker">비동기 사용을 위한 추가 설치</a></li>
+<li><a href="/install/index.html#DebianGNU-Linux">Debian/Linux에서 시스템 패키지 매니저를 사용하여 설치하기</a></li>
+</ul>
+<h2 id="실행하기"><a href="#실행하기" class="headerlink" title="실행하기"></a>실행하기</h2><ul>
+<li><a href="/run/index.html">실행하는 방법</a></li>
+<li><a href="/integration/index.html">다른 툴과 병합하는 방법</a></li>
+</ul>
+<h2 id="설정하기"><a href="#설정하기" class="headerlink" title="설정하기"></a>설정하기</h2><ul>
+<li><a href="/configure/index.html">간단한 설정법</a></li>
+<li><a href="/signals/index.html">모든 설정 옵션들</a></li>
+</ul>
+
+</div>
+
+
+<script src="/js/book-menu.js"></script>
+
+  </div>
+
+  <div class="sidebar-toggle" onclick="sidebar_toggle()" onmouseover="add_inner()" onmouseleave="remove_inner()">
+  <div class="sidebar-toggle-inner"></div>
+</div>
+
+<script>
+function add_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.add('show')  
+}
+
+function remove_inner() {
+  let inner = document.querySelector('.sidebar-toggle-inner')
+  inner.classList.remove('show')
+}
+
+function sidebar_toggle() {
+    let sidebar_toggle = document.querySelector('.sidebar-toggle')
+    let sidebar = document.querySelector('.book-sidebar')
+    let content = document.querySelector('.off-canvas-content')
+    if (sidebar_toggle.classList.contains('extend')) { // show
+        sidebar_toggle.classList.remove('extend')
+        sidebar.classList.remove('hide')
+        content.classList.remove('extend')
+    }
+    else { // hide
+        sidebar_toggle.classList.add('extend')
+        sidebar.classList.add('hide')
+        content.classList.add('extend')
+    }
+}
+</script>
+
+  <div class="off-canvas-content">
+    <div class="columns">
+      <div class="column col-10 col-lg-12">
+        <div class="book-navbar">
+          <!-- For Responsive Layout -->
+
+<header class="navbar">
+  <section class="navbar-section">
+    <a onclick="open_sidebar()">
+      <i class="icon icon-menu"></i>
+    </a>
+  </section>
+</header>
+
+        </div>
+        <div class="book-content">
+          
+<article id="page">
+  <h1>Settings</h1>
+  <p>이문서는 Gunicorn에서 설정가능한 모든 옵션에 대한 설명을 기록한 목록입니다.   </p>
+<p>일부 설정은 설정 파일에서만 설정할 수 있습니다.<br>이 경우, 커멘드라인에서 설정시 참조 할 수 있도록 커멘드라인 인수도 함께 기록되어있습니다.<br><em><code>설정 이름</code> 은 설정 파일에서 사용해야하는 이름입니다.</em></p>
+<hr>
+<blockquote>
+<p><strong>note</strong></p>
+<p><code>GUNICORN_CMD_ARGS</code> 환경 변수를 사용하여 설정을 지정할 수 있습니다.<br>이 환경변수를 사용하면, 사용 가능한 모든 커멘드라인 인수를 사용할 수 있습니다.<br>예를 들어, <code>bind</code>와 <code>workers</code>를 지정하려면 다음과 같이 실행해 볼 수 있습니다. :  </p>
+<pre><code>$ GUNICORN_CMD_ARGS=&quot;--bind=127.0.0.1 --workers=3&quot; gunicorn app:app</code></pre></blockquote>
+<p>모든 설정 옵션들은 다음과 같은 포멧으로 설명되어 있습니다.</p>
+<blockquote>
+<h3 id="lt-옵션값-이름-gt"><a href="#lt-옵션값-이름-gt" class="headerlink" title="&lt;옵션값 이름&gt;"></a>&lt;옵션값 이름&gt;</h3><ul>
+<li><code>커멘드라인 적용법</code></li>
+<li><code>기본값</code></li>
+</ul>
+<p>설명</p>
+</blockquote>
+<hr>
+<h2 id="Config-File"><a href="#Config-File" class="headerlink" title="Config File"></a>Config File</h2><h3 id="config"><a href="#config" class="headerlink" title="config"></a>config</h3><ul>
+<li><code>-c CONFIG, --config CONFIG</code></li>
+<li><code>None</code></li>
+</ul>
+<p>Gunicorn의 설정파일을 의미합니다. </p>
+<p><code>PATH</code>, <code>file:PATH</code>, 혹은 <code>python:MODULE_NAME</code> 형태의 문자열입니다. </p>
+<p>커멘드라인에서 또는 응용 프로그램 특정 구성의 일부로 지정된 경우에만 효과가 있습니다.</p>
+<h3 id="wsgi-app"><a href="#wsgi-app" class="headerlink" title="wsgi_app"></a>wsgi_app</h3><ul>
+<li><code>None</code></li>
+</ul>
+<p><code>$(MODULE_NAME):$(VARIABLE_NAME)</code> 패턴의 WSGI 응용 프로그램 경로를 말합니다.</p>
+<h2 id="Debugging"><a href="#Debugging" class="headerlink" title="Debugging"></a>Debugging</h2><h3 id="reload"><a href="#reload" class="headerlink" title="reload"></a>reload</h3><ul>
+<li><code>--reload</code></li>
+<li><code>False</code></li>
+</ul>
+<p>코드에 변경사항이 있으면, 워커를 재로드하는 옵션입니다. </p>
+<p><strong>이 옵션은 개발환경 전용 옵션입니다.</strong><br>응용프로그램의 코드가 변경될 때 마다 워커의 재시작을 일으킵니다. </p>
+<p>리로더가 Application preloading과 호환되지 않습니다.<br>따라서, 설정을 붙여넣을 경우 서버 블록의 응용 프로그램 코드를 가져 오지 않도록하세요.<br>그렇지 않으면 preloading이 설계된대로 작동하지 않습니다.   </p>
+<p>이 기능의 기본 설정은 파일 시스템으로부터 받는 풀링대신 inotify를 시도하는 것입니다.<br>inotify를 사용하는 이유는 일반적으로 inotify는 시스템 리소스를 덜 소비하기 때문입니다.</p>
+<blockquote>
+<p><strong>note</strong></p>
+<p>inotify reloader를 사용하려면  <code>inotify</code> 패키지가 설치되어 있어야 합니다.  </p>
+</blockquote>
+<h3 id="reload-engine"><a href="#reload-engine" class="headerlink" title="reload_engine"></a>reload_engine</h3><ul>
+<li><code>--reload-engine STRING</code></li>
+<li><code>auto</code></li>
+</ul>
+<p>The implementation that should be used to power reload.<br>Gunicorn의 엔진이 재시작을 수행할때 사용해야하는 방식을 정의합니다.</p>
+<p>사용 가능한 엔진은 다음과 같습니다:</p>
+<ul>
+<li>‘auto’</li>
+<li>‘poll’</li>
+<li>‘inotify’ (requires inotify)</li>
+</ul>
+<h3 id="reload-extra-files"><a href="#reload-extra-files" class="headerlink" title="reload_extra_files"></a>reload_extra_files</h3><ul>
+<li><code>--reload-extra-file FILES</code></li>
+<li><code>[]</code></li>
+</ul>
+<p>추가적으로 바라볼 파일들을 추가합니다.   </p>
+<p>리로드 옵션을 확장하여 설정한 추가 파일을보고 리로드합니다.<br>(예를 들자면, 템플릿, 설정파일, 사양, 등이 있습니다.)<br>(e.g., templates, configurations, specifications, etc.).</p>
+<h3 id="spew"><a href="#spew" class="headerlink" title="spew"></a>spew</h3><ul>
+<li><code>--spew</code></li>
+<li><code>False</code></li>
+</ul>
+<p>서버가 실행하는 모든 라인을 뿜어내는(보여주는) 추적 기능을 설치합니다.</p>
+<p>This is the nuclear option.<br>(역자주) 아주 극단적인 선택지 입니다. </p>
+<h3 id="check-config"><a href="#check-config" class="headerlink" title="check_config"></a>check_config</h3><ul>
+<li><code>--check-config</code></li>
+<li><code>False</code></li>
+</ul>
+<p>설정을 확인할 것 인지에 대한 설정입니다.</p>
+<h3 id="print-config"><a href="#print-config" class="headerlink" title="print_config"></a>print_config</h3><ul>
+<li><code>--print-config</code></li>
+<li><code>False</code></li>
+</ul>
+<p>완전히 해결 된대로 구성 설정을 인쇄합니다.<br>설정이 완전히 적용된 최종상태를 전체적으로 출력합니다. 설정 체크를 의미합니다. </p>
+<h2 id="Logging"><a href="#Logging" class="headerlink" title="Logging"></a>Logging</h2><h3 id="accesslog"><a href="#accesslog" class="headerlink" title="accesslog"></a>accesslog</h3><ul>
+<li><code>--access-logfile FILE</code></li>
+<li><code>None</code></li>
+</ul>
+<p>접속 로그를 기록할 파일을 의미합니다. </p>
+<p><code>&#39;-&#39;</code> 는 stdout을 의미합니다.</p>
+<h3 id="disable-redirect-access-to-syslog"><a href="#disable-redirect-access-to-syslog" class="headerlink" title="disable_redirect_access_to_syslog"></a>disable_redirect_access_to_syslog</h3><ul>
+<li><code>--disable-redirect-access-to-syslog</code></li>
+<li><code>False</code></li>
+</ul>
+<p>syslog에 대한 리디렉션 액세스 로그를 비활성화합니다.</p>
+<h3 id="access-log-format"><a href="#access-log-format" class="headerlink" title="access_log_format"></a>access_log_format</h3><ul>
+<li><code>--access-logformat STRING</code></li>
+<li><code>%(h)s %(l)s %(u)s %(t)s &quot;%(r)s&quot; %(s)s %(b)s &quot;%(f)s&quot; &quot;%(a)s&quot;</code></li>
+</ul>
+<p>엑세스 로그의 포멧을 의미합니다.   </p>
+<table>
+<thead>
+<tr>
+<th align="left">Identifier</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">h</td>
+<td align="left">원격지 주소</td>
+</tr>
+<tr>
+<td align="left">l</td>
+<td align="left"><code>&#39;-&#39;</code></td>
+</tr>
+<tr>
+<td align="left">u</td>
+<td align="left">사용자 이름</td>
+</tr>
+<tr>
+<td align="left">t</td>
+<td align="left">요청일</td>
+</tr>
+<tr>
+<td align="left">r</td>
+<td align="left">상태표시줄 (e.g. <code>GET / HTTP/1.1</code>)</td>
+</tr>
+<tr>
+<td align="left">m</td>
+<td align="left">request method</td>
+</tr>
+<tr>
+<td align="left">U</td>
+<td align="left">쿼리가 없는 URL path</td>
+</tr>
+<tr>
+<td align="left">q</td>
+<td align="left">쿼리</td>
+</tr>
+<tr>
+<td align="left">H</td>
+<td align="left">프로토콜</td>
+</tr>
+<tr>
+<td align="left">s</td>
+<td align="left">상태</td>
+</tr>
+<tr>
+<td align="left">B</td>
+<td align="left">응답 길이</td>
+</tr>
+<tr>
+<td align="left">b</td>
+<td align="left">응답 길이 혹은  <code>&#39;-&#39;</code> (CLF format)</td>
+</tr>
+<tr>
+<td align="left">f</td>
+<td align="left">HTTP 리퍼러</td>
+</tr>
+<tr>
+<td align="left">a</td>
+<td align="left">user agent</td>
+</tr>
+<tr>
+<td align="left">T</td>
+<td align="left">요청시간 ( 초 )</td>
+</tr>
+<tr>
+<td align="left">M</td>
+<td align="left">요청시간 ( 초/10*(-2) )</td>
+</tr>
+<tr>
+<td align="left">D</td>
+<td align="left">요청시간 ( 초/10*(-6) )</td>
+</tr>
+<tr>
+<td align="left">L</td>
+<td align="left">요청시간 ( 초 )</td>
+</tr>
+<tr>
+<td align="left">p</td>
+<td align="left">프로세스 ID</td>
+</tr>
+<tr>
+<td align="left">{header}i</td>
+<td align="left">요청 헤더</td>
+</tr>
+<tr>
+<td align="left">{header}o</td>
+<td align="left">응답 헤더</td>
+</tr>
+<tr>
+<td align="left">{variable}e</td>
+<td align="left">환경변수</td>
+</tr>
+</tbody></table>
+<p>헤더 및 환경변수 이름에 소문자를 넣고, <code>{...}x</code>를  <code>%(...)s</code> 안에 넣습니다.<br>예를들면 다음과 같습니다. </p>
+<pre><code>%({x-forwarded-for}i)s</code></pre><h3 id="errorlog"><a href="#errorlog" class="headerlink" title="errorlog"></a>errorlog</h3><ul>
+<li><code>--error-logfile FILE, --log-file FILE</code></li>
+<li><code>-</code></li>
+</ul>
+<p>접속 로그를 기록할 파일을 의미합니다. </p>
+<p><code>&#39;-&#39;</code> 는 gunicorn 로그를 stder로 기록하는것을 말합니다.</p>
+<h3 id="loglevel"><a href="#loglevel" class="headerlink" title="loglevel"></a>loglevel</h3><ul>
+<li><code>--log-level LEVEL</code></li>
+<li><code>info</code></li>
+</ul>
+<p>오류 로그 출력의 레벨을 말합니다.<br>유효한 레벨 이름들은 다음과 같습니다:</p>
+<ul>
+<li>debug</li>
+<li>info</li>
+<li>warning</li>
+<li>error</li>
+<li>critical</li>
+</ul>
+<h3 id="capture-output"><a href="#capture-output" class="headerlink" title="capture_output"></a>capture_output</h3><ul>
+<li><code>--capture-output</code></li>
+<li><code>False</code></li>
+</ul>
+<p>stdout / stderr을 오류 로그의 지정된 파일로 리디렉션합니다.</p>
+<h3 id="logger-class"><a href="#logger-class" class="headerlink" title="logger_class"></a>logger_class</h3><ul>
+<li><code>--logger-class STRING</code></li>
+<li><code>gunicorn.glogging.Logger</code></li>
+</ul>
+<p>Gunicorn에서 이벤트를 기록하는 데 사용할 로거를 말합니다.  </p>
+<p>기본 클래스 ( gunicorn.glogging.Logger)는 로깅에서 대부분의 일반적인 사용을 처리 합니다.<br>이는 오류 및 액세스 로깅을 제공합니다.  </p>
+<p>Gunicorn에 <code>gunicorn.glogging.Logger</code> 와 같은 하위 클래스에 대한 Python 경로를 제공하여 자체 로거를 사용 할 수 있습니다.  </p>
+<h3 id="logconfig"><a href="#logconfig" class="headerlink" title="logconfig"></a>logconfig</h3><ul>
+<li><code>--log-config FILE</code></li>
+<li><code>None</code></li>
+</ul>
+<p>사용할 로그 구성 파일입니다.<br>Gunicorn은 표준 Python 로깅 모듈의 설정 파일 형식을 사용합니다.  </p>
+<h3 id="logconfig-dict"><a href="#logconfig-dict" class="headerlink" title="logconfig_dict"></a>logconfig_dict</h3><ul>
+<li><code>--log-config-dict</code></li>
+<li><code>{}</code></li>
+</ul>
+<p>표준 Python 로깅 모듈의 사전 구성 형식을 사용하여 사용할 로그 설정 딕셔너리입니다.<br>이 옵션은 이전 파일 구성 형식을 사용하는 logconfig 옵션보다 우선으로 적용됩니다.    </p>
+<p>Format:<br><a href="https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig" target="_blank" rel="noopener">https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig</a></p>
+<h3 id="syslog-addr"><a href="#syslog-addr" class="headerlink" title="syslog_addr"></a>syslog_addr</h3><ul>
+<li><code>--log-syslog-to SYSLOG_ADDR</code></li>
+<li><code>unix:///var/run/syslog</code></li>
+</ul>
+<p>syslog 메시지를 보낼 주소입니다.</p>
+<p>주소는 다음 형식의 문자열입니다:  </p>
+<ul>
+<li><code>unix://PATH#TYPE</code> : 유닉스 도메인 소켓의 경우. <code>TYPE</code> 은  스트림드라이버의 경우 <code>stream</code>,<br><code>dgram</code> 드라이버의 경우, <code>stream</code>이 기본 드라이버 입니다. </li>
+<li><code>udp://HOST:PORT</code> : UDP 소켓 전용</li>
+<li><code>tcp://HOST:PORT</code> : TCP 소켓 전용</li>
+</ul>
+<h3 id="syslog"><a href="#syslog" class="headerlink" title="syslog"></a>syslog</h3><ul>
+<li><code>--log-syslog</code></li>
+<li><code>False</code></li>
+</ul>
+<p><em>Gunicorn</em> 로그를 syslog로 보냅니다.    </p>
+<h3 id="syslog-prefix"><a href="#syslog-prefix" class="headerlink" title="syslog_prefix"></a>syslog_prefix</h3><ul>
+<li><code>--log-syslog-prefix SYSLOG_PREFIX</code></li>
+<li><code>None</code></li>
+</ul>
+<p>Gunicorn이 syslog 항목에서 프로그램 이름으로 매개 변수를 사용하도록합니다.</p>
+<p>모든 항목의 앞에는 <code>gunicorn.&lt;prefix&gt;</code>이 붙습니다.<br>기본적으로, 프로그램의 이름은 프로세스의 이름입니다.  </p>
+<h3 id="syslog-facility"><a href="#syslog-facility" class="headerlink" title="syslog_facility"></a>syslog_facility</h3><ul>
+<li><code>--log-syslog-facility SYSLOG_FACILITY</code></li>
+<li><code>user</code></li>
+</ul>
+<p>Syslog facility 이름</p>
+<h3 id="enable-stdio-inheritance"><a href="#enable-stdio-inheritance" class="headerlink" title="enable_stdio_inheritance"></a>enable_stdio_inheritance</h3><ul>
+<li><code>-R, --enable-stdio-inheritance</code></li>
+<li><code>False</code></li>
+</ul>
+<p>stdio 상속을 활성화합니다. </p>
+<p>데몬모드에서 stdio 파일 디스크립터(역자주, File Descriptors, 프로세스에서 특정 파일에 접근할 대 사용하는 추상적인 값)을 상속받을 수 있도록 한다.  </p>
+<p>Note: Python stdout 버퍼링을 비활성화 하려면, <code>PYTHONUNBUFFERED</code>를 설정하세요.  </p>
+<h3 id="statsd-host"><a href="#statsd-host" class="headerlink" title="statsd_host"></a>statsd_host</h3><ul>
+<li><code>--statsd-host STATSD_ADDR</code></li>
+<li><code>None</code></li>
+</ul>
+<p>로그인 할 statsd 서버의 <code>host:port</code>.  </p>
+<h3 id="dogstatsd-tags"><a href="#dogstatsd-tags" class="headerlink" title="dogstatsd_tags"></a>dogstatsd_tags</h3><ul>
+<li><code>--dogstatsd-tags DOGSTATSD_TAGS</code></li>
+<li><code>(empty string)</code></li>
+</ul>
+<p>statsd 메트릭에 추가할 쉼표로 구분된 datadog statsd(dogstatsd) 태그 목록.  </p>
+<h3 id="statsd-prefix"><a href="#statsd-prefix" class="headerlink" title="statsd_prefix"></a>statsd_prefix</h3><ul>
+<li><code>--statsd-prefix STATSD_PREFIX</code></li>
+<li><code>(empty string)</code></li>
+</ul>
+<p>statsd 메트릭을 생성할 때 사용할 접두사(제공되지 않을 경우 후행 <code>.</code> 이 추가됩니다.).  </p>
+<h2 id="Process-Naming"><a href="#Process-Naming" class="headerlink" title="Process Naming"></a>Process Naming</h2><h3 id="proc-name"><a href="#proc-name" class="headerlink" title="proc_name"></a>proc_name</h3><ul>
+<li><code>-n STRING, --name STRING</code></li>
+<li><code>None</code></li>
+</ul>
+<p>프로세스 이름 지정을 위해 setproctitle과 함께 사용할 기본내용입니다. </p>
+<p>이 설정은 <code>ps</code>나 <code>top</code> 같은 명령어에 영향을 끼칩니다.<br>둘 이상의 Gunicorn 인스턴스를 실행하는 환경에서 두 인스턴스를 구분하기 위해 이름을 정하고 싶을 경우.<br>setproctitle 모듈을 설치해야 합니다.    </p>
+<p>설정하지 않을경우, <em>default_proc_name</em> 설정이 이름으로 적용됩니다.   </p>
+<h3 id="default-proc-name"><a href="#default-proc-name" class="headerlink" title="default_proc_name"></a>default_proc_name</h3><ul>
+<li><code>gunicorn</code></li>
+</ul>
+<p>각 애플리케이션 유형에 맞게 조정되는 내부 설정입니다.  </p>
+<h2 id="SSL"><a href="#SSL" class="headerlink" title="SSL"></a>SSL</h2><h3 id="keyfile"><a href="#keyfile" class="headerlink" title="keyfile"></a>keyfile</h3><ul>
+<li><code>--keyfile FILE</code></li>
+<li><code>None</code></li>
+</ul>
+<p>SSL 키 파일</p>
+<h3 id="certfile"><a href="#certfile" class="headerlink" title="certfile"></a>certfile</h3><ul>
+<li><code>--certfile FILE</code></li>
+<li><code>None</code></li>
+</ul>
+<p>SSL 인증서 파일</p>
+<h3 id="ssl-version"><a href="#ssl-version" class="headerlink" title="ssl_version"></a>ssl_version</h3><ul>
+<li><code>--ssl-version</code></li>
+<li><code>_SSLMethod.PROTOCOL_TLS</code></li>
+</ul>
+<p>사용할 SSL 버전입니다. </p>
+<table>
+<thead>
+<tr>
+<th align="left">–ssl-version</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">SSLv3</td>
+<td align="left">SSLv3 안전하지 않으므로, 사용하지 않는것이 좋습니다.</td>
+</tr>
+<tr>
+<td align="left">SSLv23</td>
+<td align="left">TLS를 위한 별칭입니다. Python 3.6에서 더이상 사용되지 않습니다, TLS를 사용하세요.</td>
+</tr>
+<tr>
+<td align="left">TLS</td>
+<td align="left">클라이언트 / 서버에서 사용 가능한 가장 최신 버전을 사용합니다. Python 3.6 이상부터는 SSL를 사용할 수 있습니다.</td>
+</tr>
+<tr>
+<td align="left">TLSv1</td>
+<td align="left">TLS 1.0</td>
+</tr>
+<tr>
+<td align="left">TLSv1_1</td>
+<td align="left">TLS 1.1 (Python 3.4+)</td>
+</tr>
+<tr>
+<td align="left">TLSv1_2</td>
+<td align="left">TLS 1.2 (Python 3.4+)</td>
+</tr>
+<tr>
+<td align="left">TLS_SERVER</td>
+<td align="left">TLS와 같은 가장 높은 프로토콜 버전으로 자동 적용되지만, 서버측 SSL 소켓만 연결 가능합니다. Python 3.6 이상 사용 가능</td>
+</tr>
+</tbody></table>
+<h3 id="cert-reqs"><a href="#cert-reqs" class="headerlink" title="cert_reqs"></a>cert_reqs</h3><ul>
+<li><code>--cert-reqs</code></li>
+<li><code>VerifyMode.CERT_NONE</code></li>
+</ul>
+<p>클라이언트 인증서가 필요한지 여부 (stdlib ssl 모듈 참조)  </p>
+<h3 id="ca-certs"><a href="#ca-certs" class="headerlink" title="ca_certs"></a>ca_certs</h3><ul>
+<li><code>--ca-certs FILE</code></li>
+<li><code>None</code></li>
+</ul>
+<p>CA 인증서 파일  </p>
+<h3 id="suppress-ragged-eofs"><a href="#suppress-ragged-eofs" class="headerlink" title="suppress_ragged_eofs"></a>suppress_ragged_eofs</h3><ul>
+<li><code>--suppress-ragged-eofs</code></li>
+<li><code>True</code></li>
+</ul>
+<p>비정형 EOF 억제 (stdlib ssl 모듈 참조)  </p>
+<h3 id="do-handshake-on-connect"><a href="#do-handshake-on-connect" class="headerlink" title="do_handshake_on_connect"></a>do_handshake_on_connect</h3><ul>
+<li><code>--do-handshake-on-connect</code></li>
+<li><code>False</code></li>
+</ul>
+<p>소켓 연결에서 SSL 핸드 셰이크를 수행할지 여부 (stdlib ssl module’s)</p>
+<h3 id="ciphers"><a href="#ciphers" class="headerlink" title="ciphers"></a>ciphers</h3><ul>
+<li><code>--ciphers</code></li>
+<li><code>None</code></li>
+</ul>
+<p>OpenSSL 암호 목록 형식으로 사용할 SSL 암호 제품군입니다.  </p>
+<p>기본적으로 우리는 Python의 <code>ssl</code> 모듈의 기본 암호 목록을 사용합니다. 이 목록에는 파이썬이 출시될 때마다 강력한 암호로 간주되는 암호들이 포함되어 있습니다.  </p>
+<p>권장되는 대안으로 OWASP (Open Web App Security Project)는 <a href="https://www.owasp.org/index.php/TLS_Cipher_String_Cheat_Sheet" target="_blank" rel="noopener">A +~ C- 등급의 검증 된 강력한 암호 문자열 집합을 제공 합니다.</a><br>OWASP는 각 보안 수준 에서 사용자 에이전트 호환성에 대한 세부 정보를 제공 합니다.</p>
+<p>OpenSSL 암호 목록 형식에 대한 자세한 내용은 <a href="https://www.openssl.org/docs/manmaster/man1/ciphers.html#CIPHER-LIST-FORMAT" target="_blank" rel="noopener">OpenSSL 암호 목록 형식 설명서</a> 를 참조하세요.</p>
+<h2 id="Security"><a href="#Security" class="headerlink" title="Security"></a>Security</h2><h3 id="limit-request-line"><a href="#limit-request-line" class="headerlink" title="limit_request_line"></a>limit_request_line</h3><ul>
+<li><code>--limit-request-line INT</code></li>
+<li><code>4094</code></li>
+</ul>
+<p>HTTP 요청 행의 최대 크기 (바이트)입니다.</p>
+<p>이 파라미터는 클라이언트의 HTTP 요청 라인의 허용 크기를 제한하는 데 사용됩니다. 클라이언트의 요청 라인은 HTTP 메서드, URI, 프로토콜 버전으로 구성되므로, 이 지시문은 서버에 대한 요청에 허용된 요청-URI의 길이를 제한합니다. </p>
+<p>서버는 GET 요청의 쿼리 부분에 전달될 수 있는 정보를 포함하여 리소스 이름을 저장할 수 있을 만큼 충분히 큰 값을 필요로 합니다. 값의 범위는 0(무제한)부터 8190까지의 숫자입니다.</p>
+<p>이 매개 변수는 DDOS 공격을 방지하는 데 사용할 수 있습니다.</p>
+<h3 id="limit-request-fields"><a href="#limit-request-fields" class="headerlink" title="limit_request_fields"></a>limit_request_fields</h3><ul>
+<li><code>--limit-request-fields INT</code></li>
+<li><code>100</code></li>
+</ul>
+<p>요청의 HTTP 헤더 필드 수를 제한합니다.  </p>
+<p>이 매개변수는 디도스 공격을 방지하기 위한 요청의 헤더 수를 제한하는 데 사용됩니다. <em>limit_request_field_size</em>와 함께 사용할 때 안전성이 더욱 향상됩니다.<br>이 값은 100이 기본값이며, 32768보다 클 수 없습니다.  </p>
+<h3 id="limit-request-field-size"><a href="#limit-request-field-size" class="headerlink" title="limit_request_field_size"></a>limit_request_field_size</h3><ul>
+<li><code>--limit-request-field_size INT</code></li>
+<li><code>8190</code></li>
+</ul>
+<p>HTTP 요청 헤더 필드의 허용 크기 제한  </p>
+<p>값의 범위는 양수 또는 0 입니다.<br>0으로 설정하게 되면, 헤더 필드 크기는 무제한이 됩니다. </p>
+<blockquote>
+<p><strong>warning</strong></p>
+<p>이 매개변수를 매우 높은값 혹은 무제한으로 설정할 경우, DDOS 공격을 받을 수 있습니다.   </p>
+</blockquote>
+<h2 id="Server-Hooks"><a href="#Server-Hooks" class="headerlink" title="Server Hooks"></a>Server Hooks</h2><h3 id="on-starting"><a href="#on-starting" class="headerlink" title="on_starting"></a>on_starting</h3><ul>
+<li>def on_starting(server):<pre><code>pass</code></pre></li>
+</ul>
+<p>마스터 프로세스가 초기화되기 직전에 호출됩니다.<br>호출된 프로세스는 Arbitor에 대한 단일 인스턴스 변수를 허용해야합니다.   </p>
+<h3 id="on-reload"><a href="#on-reload" class="headerlink" title="on_reload"></a>on_reload</h3><ul>
+<li>def on_reload(server):<pre><code>pass</code></pre></li>
+</ul>
+<p>SIGHUP를 통해 리로드하는 동안 워커를 재활용하도록 호출됩니다.<br>호출된 프로세스는 Arbitor에 대한 단일 인스턴스 변수를 허용해야합니다.   </p>
+<h3 id="when-ready"><a href="#when-ready" class="headerlink" title="when_ready"></a>when_ready</h3><ul>
+<li>def when_ready(server):<pre><code>pass</code></pre></li>
+</ul>
+<p>서버가 시작된 직후에 호출됩니다.<br>호출된 프로세스는 Arbitor에 대한 단일 인스턴스 변수를 허용해야합니다.   </p>
+<h3 id="pre-fork"><a href="#pre-fork" class="headerlink" title="pre_fork"></a>pre_fork</h3><ul>
+<li>def pre_fork(server, worker):<pre><code>pass</code></pre></li>
+</ul>
+<p>워커가 분기되기 직전에 호출됩니다.<br>호출된 프로세스는 Arbitor와 새로운 워커에 대한 단일 인스턴스 변수를 허용해야합니다.   </p>
+<h3 id="post-fork"><a href="#post-fork" class="headerlink" title="post_fork"></a>post_fork</h3><ul>
+<li>def post_fork(server, worker):<pre><code>pass</code></pre></li>
+</ul>
+<p>워커가 분기된 직후에 호출됩니다.<br>호출된 프로세스는 Arbitor와 새로운 워커에 대한 단일 인스턴스 변수를 허용해야합니다.   </p>
+<h3 id="post-worker-init"><a href="#post-worker-init" class="headerlink" title="post_worker_init"></a>post_worker_init</h3><ul>
+<li>def post_worker_init(worker):<pre><code>pass</code></pre></li>
+</ul>
+<p>워커가 응용프로그램을 초기화한 직후에 호출됩니다.<br>호출된 프로세스는 워커에 대한 단일 인스턴스 변수를 허용해야합니다.   </p>
+<h3 id="worker-int"><a href="#worker-int" class="headerlink" title="worker_int"></a>worker_int</h3><ul>
+<li>def worker_int(worker):<pre><code>pass</code></pre></li>
+</ul>
+<p>워커가 SIGINT 또는 SIGQUIT 으로 종료된 직후에 호출됩니다.<br>호출된 프로세스는 워커에 대한 단일 인스턴스 변수를 허용해야합니다.   </p>
+<h3 id="worker-abort"><a href="#worker-abort" class="headerlink" title="worker_abort"></a>worker_abort</h3><ul>
+<li>def worker_abort(worker):<pre><code>pass</code></pre></li>
+</ul>
+<p>워커가 SIGABRT 신호를 받으면 호출됩니다.<br>이 호출은 일반적으로 timeout 시 발생됩니다.<br>호출된 프로세스는 워커에 대한 단일 인스턴스 변수를 허용해야합니다.   </p>
+<h3 id="pre-exec"><a href="#pre-exec" class="headerlink" title="pre_exec"></a>pre_exec</h3><ul>
+<li>def pre_exec(server):<pre><code>pass</code></pre></li>
+</ul>
+<p>새 마스터 프로세스가 분기되기 직전에 호출됩니다.<br>호출된 프로세스는 Arbitor에 대한 단일 인스턴스 변수를 허용해야합니다.   </p>
+<h3 id="pre-request"><a href="#pre-request" class="headerlink" title="pre_request"></a>pre_request</h3><ul>
+<li>def pre_request(worker, req):<pre><code>worker.log.debug(&quot;%s %s&quot; % (req.method, req.path))</code></pre></li>
+</ul>
+<p>워커가 요청을 처리하기 직전에 호출됩니다.<br>호출된 프로세스는 워커와 요청에 대한 두 개의 인스턴스 변수를 허용해야합니다.   </p>
+<h3 id="post-request"><a href="#post-request" class="headerlink" title="post_request"></a>post_request</h3><ul>
+<li>def post_request(worker, req, environ, resp):<pre><code>pass</code></pre></li>
+</ul>
+<p>워커가 요청을 처리한 후 호출됩니다.<br>호출된 프로세스는 워커와 요청에 대한 두 개의 인스턴스 변수를 허용해야합니다.   </p>
+<h3 id="child-exit"><a href="#child-exit" class="headerlink" title="child_exit"></a>child_exit</h3><ul>
+<li>def child_exit(server, worker):<pre><code>pass</code></pre></li>
+</ul>
+<p>마스터 프로세스에서 작업자가 종료 된 직후에 호출됩니다.<br>호출된 프로세스는 Arbiter와 방금 종료 된 Worker에 대해 두 개의 인스턴스 변수를 허용해야합니다.</p>
+<h3 id="worker-exit"><a href="#worker-exit" class="headerlink" title="worker_exit"></a>worker_exit</h3><ul>
+<li>def worker_exit(server, worker):<pre><code>pass</code></pre></li>
+</ul>
+<p>작업자 프로세스에서 작업자가 종료 된 직후에 호출됩니다.<br>호출된 프로세스는 Arbiter와 방금 종료 된 Worker에 대해 두 개의 인스턴스 변수를 허용해야합니다.</p>
+<h3 id="nworkers-changed"><a href="#nworkers-changed" class="headerlink" title="nworkers_changed"></a>nworkers_changed</h3><ul>
+<li>def nworkers_changed(server, new_value, old_value):<pre><code>pass</code></pre></li>
+</ul>
+<p><em>num_workers</em> 가 변경된 직후에 호출 됩니다.<br>호출된 프로세스는 Arbiter의 인스턴스 변수 와 변경 전후의 작업자 수에 대한 두 개의 정수 를 받아야합니다.<br>작업자 수가 처음으로 설정된 경우 <em>old_value</em> 는 <code>None</code> 입니다.   </p>
+<h3 id="on-exit"><a href="#on-exit" class="headerlink" title="on_exit"></a>on_exit</h3><ul>
+<li>def on_exit(server):<pre><code>pass</code></pre></li>
+</ul>
+<p>Gunicorn을 종료하기 직전에 호출됩니다.  </p>
+<p>호출된 프로세스는 Arbiter에 대한 단일 인스턴스 변수를 허용해야합니다.  </p>
+<h2 id="Server-Mechanics"><a href="#Server-Mechanics" class="headerlink" title="Server Mechanics"></a>Server Mechanics</h2><h3 id="preload-app"><a href="#preload-app" class="headerlink" title="preload_app"></a>preload_app</h3><ul>
+<li><code>--preload</code></li>
+<li><code>False</code></li>
+</ul>
+<p>작업자 프로세스가 분기되기 전에 애플리케이션 코드를로드합니다.  </p>
+<p>애플리케이션을 미리 로드하여 RAM 리소스를 절약하고 서버 부팅 시간을 단축할 수 있습니다. 물론, 각 워커 프로세스에 대한 응용 프로그램의 로드를 연기하는 경우, 워커를 재시작하여 응용 프로그램 코드를 쉽게 다시 로드할 수 있다.  </p>
+<h3 id="sendfile"><a href="#sendfile" class="headerlink" title="sendfile"></a>sendfile</h3><ul>
+<li><code>--no-sendfile</code></li>
+<li><code>None</code></li>
+</ul>
+<p><code>sendfile()</code>의 사용을 비활성화합니다.  </p>
+<p>설정하지 않으면 <code>SENDFILE</code> 환경 변수 의 값 이 사용을 활성화하거나 비활성화하는 데 사용됩니다.</p>
+<h3 id="reuse-port"><a href="#reuse-port" class="headerlink" title="reuse_port"></a>reuse_port</h3><ul>
+<li><code>--reuse-port</code></li>
+<li><code>False</code></li>
+</ul>
+<p><code>SO_REUSEPORT</code> 사용중인 포트에 flag 를 설정하세요.  </p>
+<h3 id="chdir"><a href="#chdir" class="headerlink" title="chdir"></a>chdir</h3><ul>
+<li><code>--chdir</code></li>
+<li><code>/usr/src/app</code></li>
+</ul>
+<p>앱을 로드하기 전에 지정된 파일 경로(디렉터리)에 대한 chdir</p>
+<h3 id="daemon"><a href="#daemon" class="headerlink" title="daemon"></a>daemon</h3><ul>
+<li><code>-D, --daemon</code></li>
+<li><code>False</code></li>
+</ul>
+<p>Gunicorn 프로세스를 데몬 화합니다.    </p>
+<p>제어 터미널에서 서버를 분리하고, 백그라운드프로세스로 들어갑니다.  </p>
+<h3 id="raw-env"><a href="#raw-env" class="headerlink" title="raw_env"></a>raw_env</h3><ul>
+<li><code>-e ENV, --env ENV</code></li>
+<li><code>[]</code></li>
+</ul>
+<p>환경 변수 (key = value)를 설정합니다.    </p>
+<p>다음과 같이 실행 환경에 변수를 전달하는 경우,   </p>
+<pre><code>$ gunicorn -b 127.0.0.1:8000 --env FOO=1 test:app</code></pre><p>FOO 변수는 응용프로그램 내에서 사용 할 수 있습니다.   </p>
+<h3 id="pidfile"><a href="#pidfile" class="headerlink" title="pidfile"></a>pidfile</h3><ul>
+<li><code>-p FILE, --pid FILE</code></li>
+<li><code>None</code></li>
+</ul>
+<p>PID 파일에 사용할 파일 이름입니다.<br>설정되지 않으면, PID 파일이 기록되지 않습니다.   </p>
+<h3 id="worker-tmp-dir"><a href="#worker-tmp-dir" class="headerlink" title="worker_tmp_dir"></a>worker_tmp_dir</h3><ul>
+<li><code>--worker-tmp-dir DIR</code></li>
+<li><code>None</code></li>
+</ul>
+<p>워커의 <code>heartbeat</code>를 임시로 저장할때 사용할 디렉토리입니다.<br>설정하지 않으면 기본 임시 디렉토리가 사용됩니다.<br>(역자주, <code>heartbeat</code>, 일정한 간격으로 heartbeat 이벤트를 통해, 워커의 생존 유무를 체크합니다.)  </p>
+<blockquote>
+<p><strong>note</strong></p>
+<p>현재의 heartbeat 시스템은 임시 파일 핸들러에서 os.fchmod를 호출하는 것을 포함하며, 디렉토리가 디스크 백업 파일 시스템에 있는 경우 임의의 시간 동안 작업자를 차단할 수 있습니다.</p>
+<p>자세한 내용은 차단-os-fchmod를 참조하고 이 문제를 방지할 수 있는 해결 방법을 참조하세요.</p>
+</blockquote>
+<h3 id="user"><a href="#user" class="headerlink" title="user"></a>user</h3><ul>
+<li><code>-u USER, --user USER</code></li>
+<li><code>501</code></li>
+</ul>
+<p>프로세스의 user를 변경하고 싶을경우 사용합니다. </p>
+<p>유효한 사용자 ID(<code>int</code>) 또는 worker process 사용자를 변경하지 않기 위해 <code>pwd.getpwnam(value)</code> 또는 <code>none</code>으로 호출하여 검색할 수 있는 사용자 이름을 설정합니다.  </p>
+<h3 id="group"><a href="#group" class="headerlink" title="group"></a>group</h3><ul>
+<li><code>-g GROUP, --group GROUP</code></li>
+<li><code>20</code></li>
+</ul>
+<p>프로세스의 group을 변경하고 싶을경우 사용합니다. </p>
+<p>유효한 사용자 ID(<code>int</code>) 또는 worker process 사용자를 변경하지 않기 위해 <code>pwd.getpwnam(value)</code> 또는 <code>none</code>으로 호출하여 검색할 수 있는 사용자 이름을 설정합니다.  </p>
+<h3 id="umask"><a href="#umask" class="headerlink" title="umask"></a>umask</h3><ul>
+<li><code>-m INT, --umask INT</code></li>
+<li><code>0</code></li>
+</ul>
+<p>Gunicorn이 작성한 파일의 파일 모드에 대한 비트 마스크입니다.  </p>
+<p>이설정은 유닉스 소켓 권한에 영향을 미칩니다.  </p>
+<p><code>os.umask(mode)</code> 호출에 유효한 값 또는 <code>int(value, 0)</code> <code>0</code>과 호환되는 문자열 (<code>0</code>은 파이썬이 베이스를 추측한다는 의미여서 <code>0</code>, <code>0xFF</code>, <code>0022</code>와 같은 값은 십진수, 16진수, 8진수 표시에 유효합니다.)  </p>
+<h3 id="initgroups"><a href="#initgroups" class="headerlink" title="initgroups"></a>initgroups</h3><ul>
+<li><code>--initgroups</code></li>
+<li><code>False</code></li>
+</ul>
+<p><code>True</code> 로 설정된 경우, 지정된 사용자 이름이 구성원인 모든 그룹과 지정된 그룹 ID 를 사용하여 작업자 프로세스의 그룹 엑세스 목록을 설정해야 합니다.   </p>
+<h3 id="tmp-upload-dir"><a href="#tmp-upload-dir" class="headerlink" title="tmp_upload_dir"></a>tmp_upload_dir</h3><ul>
+<li><code>None</code></li>
+</ul>
+<p>읽을 때 임시 요청 데이터를 저장할 디렉토리입니다.</p>
+<p>삭제 예정인 변수입니다. </p>
+<p>이 경로는 Gunicorn 작업자에 대해 설정된 프로세스 권한으로 쓰기가 가능해야 합니다. 지정되지 않으면 Gunicorn은 시스템에서 생성된 임시 디렉토리를 선택할 것입니다.</p>
+<h3 id="secure-scheme-headers"><a href="#secure-scheme-headers" class="headerlink" title="secure_scheme_headers"></a>secure_scheme_headers</h3><ul>
+<li><code>{&#39;X-FORWARDED-PROTOCOL&#39;: &#39;ssl&#39;, &#39;X-FORWARDED-PROTO&#39;: &#39;https&#39;, &#39;X-FORWARDED-SSL&#39;: &#39;on&#39;}</code></li>
+</ul>
+<p>프론트 엔드 프록시가 HTTPS 요청을 나타내기 위해 사용하는 헤더 및 값을 포함하는 dictionary 자료형을 말합니다.<br>이를 통해 Gunicorn 에게 <code>wsgi.url_scheme</code>을 <code>https</code>로 설정하도록 지시하므로, 사용자의 요청이 안전하다는것을 알 수 있습니다. </p>
+<p>dictionary는 대문자 헤더 이름을 문자열 값에 매핑해야 합니다. 값 비교는 헤더 이름과 달리 대소문자를 구분하므로 HTTPS 요청을 처리할 때 프런트 엔드 프록시가 보내는 것과 정확히 일치하는지 확인해야 합니다.</p>
+<p>프론트 엔드 프록시 구성이 여기서 정의한 헤더를 클라이언트에서 직접 전달하지 않도록 하는 것이 중요합니다.</p>
+<h3 id="forwarded-allow-ips"><a href="#forwarded-allow-ips" class="headerlink" title="forwarded_allow_ips"></a>forwarded_allow_ips</h3><ul>
+<li><code>--forwarded-allow-ips STRING</code></li>
+<li><code>127.0.0.1</code></li>
+</ul>
+<p>설정된 보안 헤더를 처리 할 수있는 프론트 엔드의 IP입니다. (쉼표로 구분).</p>
+<p>프런트 엔드 IP의 확인을 비활성화하려면 ‘*’로 설정하면 됩니다.(프론트 엔드 IP 주소를 미리 알 수는 없지만 환경을 신뢰하는 설정에 유용함).</p>
+<p>‘FORWARDED_ALLOW_IPS’ 환경 변수의 기본값은 환경변수를 따릅니다.  정의되지 않은 경우 기본값은 “127.0.0.1” 입니다.   </p>
+<h3 id="pythonpath"><a href="#pythonpath" class="headerlink" title="pythonpath"></a>pythonpath</h3><ul>
+<li><code>--pythonpath STRING</code></li>
+<li><code>None</code></li>
+</ul>
+<p>Python 경로에 추가 할 쉼표로 구분 된 디렉토리 목록입니다.  </p>
+<p>e.g. <code>&#39;/home/djangoprojects/myproject,/home/python/mylibrary&#39;</code>.</p>
+<h3 id="paste"><a href="#paste" class="headerlink" title="paste"></a>paste</h3><ul>
+<li><code>--paste STRING, --paster STRING</code></li>
+<li><code>None</code></li>
+</ul>
+<p>PasteDeploy 구성 파일을 로드하는 경우, 인수에는 설정 파일에서 앱 섹션 이름(예: <code>production</code>) 뒤에 <code>#</code> 기호가 포함될 수 있습니다.</p>
+<p>e.g. <code>production.ini#admin.</code></p>
+<p>현재, 대체 서버 블록 사용은 지원되지 않습니다.<br>대신 명령줄 인수를 사용하여 서버 구성을 제어하세요.  </p>
+<h3 id="proxy-protocol"><a href="#proxy-protocol" class="headerlink" title="proxy_protocol"></a>proxy_protocol</h3><ul>
+<li><code>--proxy-protocol</code></li>
+<li><code>False</code></li>
+</ul>
+<p>프록시 프로토콜 감지를 활성화합니다 (PROXY 모드).</p>
+<p>HTTP와 프록시를 함께 사용할 수 있습니다.<br>stunnel을 HTTPS 프론트 엔드로, Gunicorn을 HTTP 서버 로 사용하는 데 유용 할 수 있습니다.</p>
+<p>PROXY protocol:<br><a href="http://haproxy.1wt.eu/download/1.5/doc/proxy-protocol.txt" target="_blank" rel="noopener">http://haproxy.1wt.eu/download/1.5/doc/proxy-protocol.txt</a></p>
+<p>stunnel 설정 사용예 :</p>
+<pre><code>[https]
+protocol = proxy
+accept  = 443
+connect = 80
+cert = /etc/ssl/certs/stunnel.pem
+key = /etc/ssl/certs/stunnel.key</code></pre><h3 id="proxy-allow-ips"><a href="#proxy-allow-ips" class="headerlink" title="proxy_allow_ips"></a>proxy_allow_ips</h3><ul>
+<li><code>--proxy-allow-from</code></li>
+<li><code>127.0.0.1</code></li>
+</ul>
+<p>프록시 요청을 수락할 수 있는 프론트 엔드의 IP(쉼표 구분)</p>
+<p>프런트 엔드 IP의 확인을 비활성화하려면 <code>*</code>로 설정하세요 (프론트 엔드 IP 주소를 미리 알 수는 없지만 환경을 신뢰하는 설정에 유용함).</p>
+<h3 id="raw-paste-global-conf"><a href="#raw-paste-global-conf" class="headerlink" title="raw_paste_global_conf"></a>raw_paste_global_conf</h3><ul>
+<li><code>--paste-global CONF</code></li>
+<li><code>[]</code></li>
+</ul>
+<p>PasteDeploy 전역 구성 변수를 <code>key=value</code>양식으로 설정합니다 .<br>이 옵션은 여러 번 지정할 수 있습니다.<br>변수는 PasteDeploy 진입 점으로 전달됩니다.  </p>
+<p>예:  </p>
+<pre><code>$ gunicorn -b 127.0.0.1:8000 --paste development.ini --paste-global FOO=1 --paste-global BAR=2</code></pre><h3 id="strip-header-spaces"><a href="#strip-header-spaces" class="headerlink" title="strip_header_spaces"></a>strip_header_spaces</h3><ul>
+<li><code>--strip-header-spaces</code></li>
+<li><code>False</code></li>
+</ul>
+<p>헤더 이름과 <code>:</code> 사이에 있는 공간을 분리해 줍니다.</p>
+<p>이는 취약점을 유발하는 것으로 알려져 있으며, HTTP / 1.1 표준을 준수하지 않습니다.<br><a href="https://portswigger.net/research/http-desync-attacks-request-smuggling-reborn" target="_blank" rel="noopener">다음을 참고하세요.</a> </p>
+<h2 id="Server-Socket"><a href="#Server-Socket" class="headerlink" title="Server Socket"></a>Server Socket</h2><h3 id="bind"><a href="#bind" class="headerlink" title="bind"></a>bind</h3><ul>
+<li><code>-b ADDRESS, --bind ADDRESS</code></li>
+<li><code>[&#39;127.0.0.1:8000&#39;]</code></li>
+</ul>
+<p>바인딩 할 소켓입니다.</p>
+<p>형식: <code>HOST</code>, <code>HOST:PORT</code>, <code>unix:PATH</code>, <code>fd://FD</code>. IP는 유효한  <code>HOST</code>를 의미합니다.</p>
+<p>여러 주소를 바인딩 할 수 있습니다. ex.:</p>
+<pre><code>$ gunicorn -b 127.0.0.1:8000 -b [::1]:8000 test:app</code></pre><p>ipv6 및 ipv4 인터페이스 전체 에서 localhost의 test : app 응용 프로그램을 바인딩합니다.</p>
+<p>만약 <code>PORT</code> 환경변수가 정의되어있다면, 기본설정은 <code>[&#39;0.0.0.0:$PORT&#39;]</code> 입니다.<br>그렇지 않다면  기본 설정은 <code>[&#39;127.0.0.1:8000&#39;]</code> 입니다.   </p>
+<h3 id="backlog"><a href="#backlog" class="headerlink" title="backlog"></a>backlog</h3><ul>
+<li><code>--backlog INT</code></li>
+<li><code>2048</code></li>
+</ul>
+<p>보류중인 최대 연결 수입니다.    </p>
+<p>이 변수는 서비스를 받기 위해 대기할 수 있는 클라이언트 수를 말합니다. 이 숫자를 초과하면 클라이언트가 연결을 시도할 때 오류가 발생합니다. 이는 상당한 부하를 받는 서버에만 영향을 미칩니다.  </p>
+<p>양의 정수여야 하며, 일반적으로 64-2048의 범위로 설정합니다.  </p>
+<h2 id="Worker-Processes"><a href="#Worker-Processes" class="headerlink" title="Worker Processes"></a>Worker Processes</h2><h3 id="workers"><a href="#workers" class="headerlink" title="workers"></a>workers</h3><ul>
+<li><code>-w INT, --workers INT</code></li>
+<li><code>1</code></li>
+</ul>
+<p>요청을 처리하기위한 작업자 프로세스 수입니다.  </p>
+<p>일반적으로 <code>2-4 x $(NUM_CORES)</code> 범위의 양의 정수를 사용합니다. 특정 응용프로그램의 작업 부하에 가장 적합한 항목을 찾기 위해 이 항목을 약간 변경하여 사용하세요.</p>
+<p>기본으로, <code>WEB_CONCURRENCY</code>환경변수를 다릅니다. 만약 설정되어있지 않다면 <code>1</code>의 기본값을 가집니다.   </p>
+<h3 id="worker-class"><a href="#worker-class" class="headerlink" title="worker_class"></a>worker_class</h3><ul>
+<li><code>-k STRING, --worker-class STRING</code></li>
+<li><code>sync</code></li>
+</ul>
+<p>사용할 워커의 타입입니다. </p>
+<p>기본 클래스는 <code>sync</code> 입니다. 이는, 대부분의 “normal” 타입의 워크로드를 처리합니다.<br>다른 워커중 하나를 선책하려는 경우, 디자인 문서를 통해 사전 정보를 취득하고, 상황에 맞는 워커를 사용하여야 합니다. 다른 워커를 사용하는데 필요한 라이브러리는 setuptools의<code>extras_require</code> 기능을 사용하여 설치할 수 있습니다.</p>
+<p>다음은 사용할 수 있는 워커 클래스입니다:</p>
+<ul>
+<li><code>sync</code></li>
+<li><code>eventlet</code> - 의존성 패키지 eventlet &gt;= 0.24.1 ( 혹은, 다음 명령어로 설치<br><code>pip install gunicorn[eventlet]</code>)</li>
+<li><code>gevent</code> - 의존성 패키지 gevent &gt;= 1.4 ( 혹은, 다음 명령어로 설치<br><code>pip install gunicorn[gevent]</code>)</li>
+<li><code>tornado</code> - 의존성 패키지 tornado &gt;= 0.2 ( 혹은, 다음 명령어로 설치<br><code>pip install gunicorn[tornado]</code>)</li>
+<li><code>gthread</code> - Python2 일경우 패키지를 설치하여야 합니다.<br>( 혹은, 다음 명령어로 설치 <code>pip install gunicorn[gthread]</code>)</li>
+</ul>
+<p>선택적으로, Gunicorn 에게 Gunicorn의 하위 클래스에 파이썬 경로를 부여함으로서, <code>gunicorn.workers.base.Worker</code> 가 사용할 파이썬의 경로를 지정항 수 있습니다.<br>이 대체 구문은 <code>gunicorn.workers.ggevent.GeventWorker</code>라는 gevent class를 로드할 것 입니다.  </p>
+<h3 id="threads"><a href="#threads" class="headerlink" title="threads"></a>threads</h3><ul>
+<li><code>--threads INT</code></li>
+<li><code>1</code></li>
+</ul>
+<p>요청을 처리하기 위한 워커의 스레드 수입니다.</p>
+<p>각 워커는 지정된 스레드 수를 가집니다. </p>
+<p>일반적으로 2-4 x 달러(NUM_CORES) 범위의 양의 정수. 특정 응용프로그램의 작업 부하에 가장 적합한 항목을 찾기 위해 이 항목을 약간 변경하세요.</p>
+<p>일반적으로, 스레드 수는 <code>2-4 x $(NUM_CORES)</code> 범위의 양의 정수를 사용합니다. 운영하는 응용프로그램의 작업 부하에 가장 적합한 스레드 수를 찾기 위해서는 직접 스레드 수를 변경하며 찾는것을 권장합니다. </p>
+<p>값이 지정되지 않는다면, 기본값으로 <code>1</code>이 지정됩니다.   </p>
+<p>이 설정은 <code>Gthread</code>워커일 경우에만 적용됩니다.   </p>
+<blockquote>
+<p><strong>note</strong></p>
+<p><code>sync</code> 타입의 워커를 사용하지만 Thread 옵션을 설정하고, 스레드의 수가 1을 넘는 경우,<br><code>gthread</code> 워커가 대신 사용됩니다.</p>
+</blockquote>
+<h3 id="worker-connections"><a href="#worker-connections" class="headerlink" title="worker_connections"></a>worker_connections</h3><ul>
+<li><code>--worker-connections INT</code></li>
+<li><code>1000</code></li>
+</ul>
+<p>최대 동시 클라이언트 수입니다.  </p>
+<p><strong>이 설정은 Eventlet 및 Gevent worker 유형에만 영향을 끼칩니다.</strong>  </p>
+<h3 id="max-requests"><a href="#max-requests" class="headerlink" title="max_requests"></a>max_requests</h3><ul>
+<li><code>--max-requests INT</code></li>
+<li><code>0</code></li>
+</ul>
+<p>재시작하기 전에 워커가 처리할 최대 요청 수입니다.</p>
+<p>값이 0보다 크게 설정되면 워커가 자동으로 재시작하기 전에 처리할 요청 수가 제한됩니다.<br><strong>메모리 누수의 피해를 줄이는 데 도움을 주는 간단한 방법이다.</strong></p>
+<p>이 값이 0(기본값)으로 설정되어 있으면 워커의 자동 재시작이 비활성화됩니다.</p>
+<h3 id="max-requests-jitter"><a href="#max-requests-jitter" class="headerlink" title="max_requests_jitter"></a>max_requests_jitter</h3><ul>
+<li><code>--max-requests-jitter INT</code></li>
+<li><code>0</code></li>
+</ul>
+<p><em>max_requests</em> 설정에 추가할 최대 지터.</p>
+<p>지터는 각 워커별로 랜덤하게 <code>randint(0, max_requests_jitter)</code> 대로 재시작을 유발합니다.<br>이는, 모든 워커가 동시에 다시 시작되지 않도록 막아주는 역할을 수행합니다.</p>
+<h3 id="timeout"><a href="#timeout" class="headerlink" title="timeout"></a>timeout</h3><ul>
+<li><code>-t INT, --timeout INT</code></li>
+<li><code>30</code></li>
+</ul>
+<p>지정된 초 이상 응답이 없는 워커는 종료된 후, 재시작됩니다. </p>
+<p>값은 양수 또는 0이다. 0으로 설정하면 모든 작업자의 시간 초과를 완전히 비활성화하여 무한한 시간 초과의 효과가 있다</p>
+<p>값은 양수 혹은 0입니다. 0으로 설정하게 되면 모든 워커의 timeout을 완전히 비활성화 하며, timeou을 따로 체크하지 않습니다. </p>
+<p>일반적으로는 30초가 충분합니다. 동기 워커에게 미치는 영향이 확실할 경우에만 이 값을 높게 설정하세요.<br>비동기 워커에게는 이 설정이 워커 프로세스가 여전히 의사소통중이고, 단일 요청을 처리하는데 필요한 시간에 얽메이지 않는다는것을 의미합니다. </p>
+<h3 id="graceful-timeout"><a href="#graceful-timeout" class="headerlink" title="graceful_timeout"></a>graceful_timeout</h3><ul>
+<li><code>--graceful-timeout INT</code></li>
+<li><code>30</code></li>
+</ul>
+<p>정상인 워커의 재시작 시간.</p>
+<p>재시작 신호를 받은 워커들은 재시작한 이후부터 옵션에서 지정된 시간대로 수명을 지닙니다.<br>지정된 시간을 초과하여 생존한 워커들은 모두 강제적으로 프로세스를 <code>kill</code> 합니다.</p>
+<h3 id="keepalive"><a href="#keepalive" class="headerlink" title="keepalive"></a>keepalive</h3><ul>
+<li><code>--keep-alive INT</code></li>
+<li><code>2</code></li>
+</ul>
+<p>Keep-Alive 연결에서 요청을 대기하는 시간(초)를 말합니다. </p>
+<p>일반적으로 클라이언트와 직접 연결된 서버의 경우(예: 별도의 로드 밸런서가 없는 경우) 1~5초 범위에서 설정됩니다. Gunicorn이 로드밸런서 뒤에 배치되었을 때, 이 값을 더 높은 값으로 설정하는 것이 종종 옳습니다.</p>
+<blockquote>
+<p><strong>note</strong></p>
+<p><code>sync</code> worker does not support persistent connections and will ignore<br>this option.</p>
+</blockquote>
+
+</article>
+
+<div id="paginator">
+  
+</div>
+
+        </div>
+      </div>
+      <div class="column col-2 hide-lg">
+        <div class="book-post-info">
+  
+    <div class="book-post-meta">
+
+  <div class="author">
+
+    <!-- Author image -->
+    <div class="author-img">
+      
+        <figure
+          class="avatar avatar-lg"
+          data-initial="n"
+          style="background-color: #3b4351;">
+        </figure>
+      
+    </div>
+
+    <!-- Author title -->
+    <div class="author-title">
+      <div>nanaones</div>
+      <div>2020-08-13</div>
+    </div>
+  </div>
+
+  
+
+  <div class="divider"></div>
+</div>
+  
+
+  <div class="book-tocbot">
+</div>
+<div class="book-tocbot-menu">
+  <a class="book-toc-expand" onclick="expand_toc()">Expand all</a>
+  <a onclick="go_top()">Back to top</a>
+  <a onclick="go_bottom()">Go to bottom</a>
+</div>
+
+
+<script src="/js/book-toc.js"></script>
+
+</div>
+      </div>
+    </div>
+  </div>
+  
+  <a class="off-canvas-overlay" onclick="hide_canvas()"></a>
+</div>
+
+</body>
+</html>
+
+
+<script src="/js/book.js"></script>
